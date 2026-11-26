@@ -1,0 +1,112 @@
+;; Sandbox profile for the reviewing agent.
+;;
+;; The tool list could not hold the line, because it was the wrong list:
+;; `--allowedTools` names what runs without a prompt and never removed a tool,
+;; so the deny list beside it was the only bound — and a deny list is an
+;; enumeration, which is why it was missing `Monitor` (arbitrary shell) until
+;; the reviewer used it to prove the point, 2026-08-11. `--tools` is the flag
+;; that sets the built-in set; this profile is the same shape of rule for the
+;; filesystem, and it holds against a tool nobody thought to name.
+;;
+;; Everything is denied except what is named. The reviewer reads a checkout and
+;; writes a review to stdout, so the only writes it has any business making are
+;; its own session state.
+;;
+;; Reads and network stay open — `claude` needs its credentials and the API —
+;; which bounds what this buys: it stops the process leaving anything behind
+;; on the machine, and it stops it reading this job's tokens. It does not stop
+;; it reading whatever else the user can read.
+;;
+;; Parameters come from -D on the command line: CLONE, SESSIONS, TMPDIR,
+;; TOKENS, SSH, AWS, GH_CONFIG.
+;;
+;; Every one of them has to arrive canonical — resolved, no trailing slash, no
+;; `//`, no `.` or `..` segment, no symlinked component. The kernel
+;; canonicalizes the path a process is opening and then compares it against
+;; these strings as strings: `/Users/user/` and `/Users/user/../me` and a
+;; `/System/Volumes/Data/Users/user` firmlink spelling all name the same
+;; directory and none of them match a rule written the other way. A malformed
+;; parameter therefore does not fail — the rule simply stops matching anything,
+;; which for a deny means the deny is gone. Nothing in this language can
+;; canonicalize a path, so run_reviewer does it, and refuses to launch when the
+;; result is not canonical. Do not derive a path here with `string-append` on
+;; a directory that a dotfile manager may have turned into a symlink; pass the
+;; resolved directory in as its own parameter instead.
+
+(version 1)
+(allow default)
+
+(deny file-write*)
+
+(allow file-write*
+  (subpath (param "CLONE"))
+  (subpath (param "SESSIONS"))
+  (subpath (param "TMPDIR"))
+  (literal "/dev/null")
+  (literal "/dev/stdout")
+  (literal "/dev/stderr")
+  (literal "/dev/dtracehelper")
+  (regex #"^/dev/tty"))
+
+;; After the allow above, because the last matching rule wins.
+;;
+;; The clone is writable, and these are inside it. Each one is read back by a
+;; process that runs in that same directory on a later tick, when this
+;; perimeter is no longer around it, and each is read as something to act on
+;; rather than as text:
+;;
+;;   .git          the shell runs `git fetch` and `gh pr checkout` there,
+;;                 outside this sandbox. A `remote.origin.url` of
+;;                 `ext::sh -c …`, or a `post-checkout` hook, is then code
+;;                 execution as the user.
+;;   .claude       `claude` runs with the clone as its working directory and
+;;                 reads project-local settings, hooks, agents, commands and
+;;                 skills from there. A hook in `.claude/settings.json` is a
+;;                 command line, run for events as ordinary as a session
+;;                 starting — the `Monitor` hole again, planted rather than
+;;                 called, and it is what the user runs in the clone by hand
+;;                 that runs it with nothing around it.
+;;   .mcp.json     a list of servers to launch: command, arguments,
+;;                 environment. Code by another name.
+;;   CLAUDE.md     read as instructions by every `claude` started there, this
+;;                 job's next tick included.
+;;
+;; A checkout writes all of these when the branch under review carries them,
+;; which this cannot help — see the README. What it stops is the reviewer
+;; leaving one behind for the run after it.
+;;
+;; These five are appended to CLONE, against the rule above, and it holds only
+;; because of what run_reviewer does either side of it: CLONE is resolved
+;; before it is passed, and a review whose clone has any of these names as a
+;; symlink does not start — a link at `.claude` would carry the write to a
+;; target these rules do not name, and the next `claude` would read it back
+;; through the same link.
+(deny file-write*
+  (subpath (string-append (param "CLONE") "/.git"))
+  (subpath (string-append (param "CLONE") "/.claude"))
+  (subpath (string-append (param "CLONE") "/.gemini"))
+  (subpath (string-append (param "CLONE") "/.agents"))
+  (subpath (string-append (param "CLONE") "/.agent"))
+  (subpath (string-append (param "CLONE") "/_agents"))
+  (subpath (string-append (param "CLONE") "/_agent"))
+  (literal (string-append (param "CLONE") "/.mcp.json"))
+  (literal (string-append (param "CLONE") "/CLAUDE.md"))
+  (literal (string-append (param "CLONE") "/CLAUDE.local.md"))
+  (literal (string-append (param "CLONE") "/AGENTS.md"))
+  (literal (string-append (param "CLONE") "/GEMINI.md")))
+
+;; The job's own credentials, one file per repository, and the three places on
+;; this machine where a credential that is not this job's lives. The reviewer
+;; has no reason to read any of them: every GitHub call is made by the shell,
+;; outside this sandbox. A process that can exec and reach the network could
+;; otherwise post them somewhere.
+;;
+;; One parameter per directory, resolved by run_reviewer. `~/.config` is the
+;; directory a dotfile manager is most likely to have made a symlink, and
+;; `(string-append (param "HOMEDIR") "/.config/gh")` would then have named a
+;; path no process ever opens — a deny in the file, matching nothing.
+(deny file-read*
+  (subpath (param "TOKENS"))
+  (subpath (param "SSH"))
+  (subpath (param "AWS"))
+  (subpath (param "GH_CONFIG")))

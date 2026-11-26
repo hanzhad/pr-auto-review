@@ -1,0 +1,7 @@
+{
+  "error": {
+    "type": "AuthError",
+    "code": 401,
+    "message": "Antigravity login has expired; run agy auth login."
+  }
+}

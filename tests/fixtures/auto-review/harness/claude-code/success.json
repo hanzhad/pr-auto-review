@@ -1,0 +1,25 @@
+{
+  "type": "result",
+  "subtype": "success",
+  "is_error": false,
+  "api_error_status": null,
+  "duration_ms": 41873,
+  "duration_api_ms": 39211,
+  "num_turns": 7,
+  "result": "**1 finding.** - the retry loop never backs off\n\n1. `scripts/poll.sh:42` retries in a tight loop with no sleep, so one flaky endpoint pins a core.\n",
+  "session_id": "5c1d0b52-7f0e-4a55-9b61-0a1f2e3d4c5b",
+  "total_cost_usd": 0.0731,
+  "usage": {
+    "input_tokens": 12,
+    "cache_creation_input_tokens": 8210,
+    "cache_read_input_tokens": 41022,
+    "output_tokens": 412
+  },
+  "modelUsage": {
+    "claude-sonnet-5-5": {
+      "inputTokens": 12,
+      "outputTokens": 412,
+      "costUSD": 0.0731
+    }
+  }
+}
