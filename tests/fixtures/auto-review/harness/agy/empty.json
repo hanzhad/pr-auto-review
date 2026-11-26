@@ -1,0 +1,19 @@
+{
+  "response": "",
+  "stats": {
+    "models": {
+      "gemini-3.8-flash-medium": {
+        "api": {
+          "totalRequests": 1,
+          "totalErrors": 0,
+          "totalLatencyMs": 1810
+        },
+        "tokens": {
+          "prompt": 38211,
+          "candidates": 0,
+          "total": 38211
+        }
+      }
+    }
+  }
+}

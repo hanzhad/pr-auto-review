@@ -1,0 +1,15 @@
+{
+  "type": "result",
+  "subtype": "success",
+  "is_error": false,
+  "api_error_status": null,
+  "duration_ms": 7012,
+  "num_turns": 1,
+  "result": "Failed to authenticate. API Error: 401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"OAuth token has expired.\"}}",
+  "session_id": "9e8d7c6b-5a49-4382-b1a0-f9e8d7c6b5a4",
+  "total_cost_usd": 0,
+  "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0
+  }
+}

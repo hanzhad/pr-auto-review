@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "harness": "claude-code",
+  "model": "sonnet",
+  "all": true,
+  "self_review": true,
+  "projects": {
+    "acme/webapp": {
+      "enabled": true,
+      "interval": 300
+    },
+    "acme/docs": {
+      "enabled": true,
+      "interval": 300
+    },
+    "example/tool": {
+      "enabled": true,
+      "interval": 300
+    }
+  }
+}

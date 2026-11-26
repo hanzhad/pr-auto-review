@@ -16,13 +16,33 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Run unit tests
         run: python3 -m unittest discover -s tests -v
+      - name: Run diff-budget tests
+        run: bash tests/test-auto-review-diff-budget.sh
+      - name: Run registry-settings tests
+        run: bash tests/test-auto-review-registry-settings.sh
+      - name: Run harness-models tests
+        run: bash tests/test-auto-review-harness-models.sh
+      - name: Run credentials-isolation tests
+        run: bash tests/test-auto-review-credentials-isolation.sh
+      - name: Run daemon-tick tests
+        run: bash tests/test-auto-review-daemon-tick.sh
+
+  docker-isolation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Run reviewer isolation docker tests
+        run: RUN_DOCKER_TESTS=1 bash tests/test-auto-review-reviewer-isolation-docker.sh
 
   scan:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

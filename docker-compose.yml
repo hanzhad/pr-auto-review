@@ -1,0 +1,45 @@
+# Docker Compose for auto-review machine container service (Issue 207 / 4.1).
+name: 0-review
+services:
+  auto-review:
+    image: auto-review:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: auto-review
+    restart: unless-stopped
+    read_only: true
+    # uid 0 only until entrypoint.sh drops to 10001 keeping SETUID/SETGID; root
+    # without DAC_OVERRIDE cannot read the gate's 0700 directories.
+    user: "0"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - SETUID
+      - SETGID
+    tmpfs:
+      - /run/auto-review:size=32M,mode=0700,uid=10001,gid=10001
+      - /tmp:size=128M,mode=1777
+      - /home/reviewer:size=512M,mode=0700,uid=10001,gid=10001
+      # The reviewer's HOME: 10002 only; it makes its per-review directory itself.
+      - /home/rv:size=512M,mode=0700,uid=10002,gid=10002
+    volumes:
+      # The gate's state, the registry (projects.json) among it: a volume, in no
+      # git checkout, written only by the container's own CLI.
+      - auto-review-state:/var/lib/auto-review
+      - auto-review-clones:/var/lib/auto-review/clones
+      # The checkout, read-only: an untracked projects.json in it from before the
+      # volume is copied into the registry once, at start (see the README).
+      - .:/etc/auto-review/legacy:ro
+    environment:
+      - AUTO_REVIEW_INTERVAL=180
+      - AUTO_REVIEW_MEMORY_FLOOR_MB=1500
+      - AUTO_REVIEW_REGISTRY=/var/lib/auto-review/projects.json
+
+volumes:
+  auto-review-state:
+    name: auto-review-state
+  auto-review-clones:
+    name: auto-review-clones

@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Host CLI wrapper for the pr-auto-review machine container.
+set -euo pipefail
+
+_self=${BASH_SOURCE[0]}
+while [ -L "$_self" ]; do
+  _dir=$(cd "$(dirname "$_self")" && pwd)
+  _self=$(readlink "$_self")
+  case $_self in /*) ;; *) _self=$_dir/$_self ;; esac
+done
+REPO_DIR=$(cd "$(dirname "$_self")/.." && pwd)
+GATE_UID="${AUTO_REVIEW_GATE_UID:-10001}"
+CONTAINER="${AUTO_REVIEW_CONTAINER:-auto-review}"
+
+cmd=${1:-}
+case "$cmd" in
+  up|down|logs)
+    shift
+    exec docker compose -f "$REPO_DIR/docker-compose.yml" "$cmd" "$@"
+    ;;
+  probe)
+    exec docker run --rm auto-review:local probe
+    ;;
+  unlock-token)
+    shift
+    exec "$REPO_DIR/unlock-token.sh" "$@"
+    ;;
+  *)
+    if [ -t 0 ] && [ -t 1 ]; then
+      exec docker exec -it -u "$GATE_UID" "$CONTAINER" auto-review "$@"
+    else
+      exec docker exec -i -u "$GATE_UID" "$CONTAINER" auto-review "$@"
+    fi
+    ;;
+esac

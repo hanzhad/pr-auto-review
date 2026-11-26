@@ -1,0 +1,16 @@
+{
+  "type": "result",
+  "subtype": "success",
+  "is_error": true,
+  "api_error_status": 429,
+  "duration_ms": 612,
+  "duration_api_ms": 0,
+  "num_turns": 1,
+  "result": "You have hit your session limit - resets 2:10pm",
+  "session_id": "0b7a9c1e-3d44-4f0a-8a2e-6d5f4c3b2a19",
+  "total_cost_usd": 0,
+  "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0
+  }
+}

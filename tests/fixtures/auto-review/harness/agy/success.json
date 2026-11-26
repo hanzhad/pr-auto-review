@@ -1,0 +1,24 @@
+{
+  "response": "**1 finding.** - the retry loop never backs off\n\n1. `scripts/poll.sh:42` retries in a tight loop with no sleep, so one flaky endpoint pins a core.\n",
+  "stats": {
+    "models": {
+      "gemini-3.8-flash-medium": {
+        "api": {
+          "totalRequests": 6,
+          "totalErrors": 0,
+          "totalLatencyMs": 21044
+        },
+        "tokens": {
+          "prompt": 38211,
+          "candidates": 397,
+          "total": 38608
+        }
+      }
+    },
+    "tools": {
+      "totalCalls": 5,
+      "totalSuccess": 5,
+      "totalFail": 0
+    }
+  }
+}
