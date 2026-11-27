@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# secret-vault receiver script for auto-review machine container (Issue 5.1).
+# Token receiver script for pr-auto-review container.
 #
 # Receives token from stdin and stores it in RAM/tmpfs (/run/auto-review).
 # If the auto-review Docker container is running, injects into container tmpfs.
