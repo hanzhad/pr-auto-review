@@ -14,6 +14,28 @@ CONTAINER="${AUTO_REVIEW_CONTAINER:-auto-review}"
 
 cmd=${1:-}
 case "$cmd" in
+  -h|--help|help)
+    cat <<'HELP'
+Usage: bin/auto-review <command> [args...]
+
+Host commands:
+  up [-d]                 Start the pr-auto-review container via docker compose
+  down                    Stop and remove the pr-auto-review container
+  logs [-f]               Follow container logs
+  probe                   Verify the auto-review:local image environment
+  unlock-token [args...]  Pipe a token from stdin into the running container tmpfs
+
+Container commands (delegated to uid 10001 inside the container):
+  setup <owner/repo>      Register, clone, and verify a repository
+  list                    List registered repositories and pause states
+  pause|resume <repo>     Pause or resume automated reviews for a repository
+  tick [path]             Run one review pass across active repositories (or one checkout)
+  credential set|list     Store or check harness credentials (stdin)
+  login <harness>         Run interactive harness login and store credential
+  status [--json]         Print daemon and active review status
+HELP
+    exit 0
+    ;;
   up|down|logs)
     shift
     exec docker compose -f "$REPO_DIR/docker-compose.yml" "$cmd" "$@"

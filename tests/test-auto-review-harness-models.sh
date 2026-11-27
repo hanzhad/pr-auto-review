@@ -160,9 +160,9 @@ section_1() (
   check "adapters/harness/gemini-cli.sh is removed" absent "$([ -e "$adir/gemini-cli.sh" ] && echo present || echo absent)"
   check "test-auto-review-gemini-adapter.sh goes with its adapter" absent \
     "$([ -e "$here/scripts/test-auto-review-gemini-adapter.sh" ] && echo present || echo absent)"
-  check "GEMINI_API_KEY appears nowhere under auto-review/ and tools/auto-review/" "" \
+  check "GEMINI_API_KEY appears nowhere in the repository" "" \
     "$(grep -rIl --exclude-dir=tests --exclude-dir=.git 'GEMINI_API_KEY' "$here" 2>/dev/null | sed "s|$here/||")"
-  check "the gemini-cli harness name appears nowhere under auto-review/ and tools/auto-review/" "" \
+  check "the gemini-cli harness name appears nowhere in the repository" "" \
     "$(grep -rIl --exclude-dir=tests --exclude-dir=.git 'gemini-cli' "$here" 2>/dev/null | sed "s|$here/||")"
 
   mkdir -p "$fixtures/home" "$fixtures/tokens" "$fixtures/lock"

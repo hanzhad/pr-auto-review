@@ -1,4 +1,4 @@
-# Docker Compose for auto-review machine container service (Issue 207 / 4.1).
+# Docker Compose for pr-auto-review machine container service.
 name: 0-review
 services:
   auto-review:

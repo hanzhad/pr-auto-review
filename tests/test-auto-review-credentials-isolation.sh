@@ -231,8 +231,8 @@ ADAPTER_EOF
   run_in /dev/null credential list
   has "third adapter: credential list shows it" "$(cat "$fixtures/out")" "fakeh"
 
-  check "git grep -i secret-vault -- auto-review/ is empty" "" \
-    "$(cd "$here" && git grep -i -l secret-vault -- auto-review/ 2>/dev/null)"
+  check "git grep -i secret-vault outside tests/ is empty" "" \
+    "$(cd "$here" && git grep -i -l secret-vault -- ':!tests/' 2>/dev/null)"
 
   reject() {
     mode "$5"
